@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SMS 111 Biochemistry — Bloom's Blitz</title>
+<style>
+  :root {
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    --bg: #f4f6fb;
+    --card-bg: #ffffff;
+    --text: #10131a;
+    --text-muted: #62697b;
+    --border: #e3e6ee;
+    --accent: #5b5ff0;
+    --accent-soft: #eceafe;
+    --correct: #16a34a;
+    --correct-soft: #dcfce7;
+    --incorrect: #dc2626;
+    --incorrect-soft: #fee2e2;
+    --remember: #3b82f6;
+    --understand: #06b6d4;
+    --apply: #16a34a;
+    --analyze: #d97706;
+    --evaluate: #9333ea;
+    --create: #e11d48;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0d1117;
+      --card-bg: #161b25;
+      --text: #eef1f7;
+      --text-muted: #97a0b5;
+      --border: #2a3140;
+      --accent-soft: #232244;
+      --correct-soft: #123821;
+      --incorrect-soft: #3a1418;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0d1117;
+    --card-bg: #161b25;
+    --text: #eef1f7;
+    --text-muted: #97a0b5;
+    --border: #2a3140;
+    --accent-soft: #232244;
+    --correct-soft: #123821;
+    --incorrect-soft: #3a1418;
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  #app {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: max(16px, env(safe-area-inset-top, 0px)) 16px max(24px, env(safe-area-inset-bottom, 0px));
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  .brand {
+    text-align: center;
+    padding: 6px 0 14px;
+  }
+  .brand h1 {
+    font-size: clamp(1.1rem, 5vw, 1.4rem);
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+  .brand p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+  }
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .start-list {
+    text-align: left;
+    margin: 16px 0 20px;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .start-list li {
+    display: flex;
+    gap: 10px;
+    font-size: 0.92rem;
+    color: var(--text);
+    align-items: flex-start;
+  }
+  .start-list li .dot {
+    flex: none;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-top: 6px;
+  }
+  .name-tag {
+    color: var(--accent);
+    font-weight: 700;
+  }
+  button.primary-btn {
+    width: 100%;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    padding: 15px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button.primary-btn:active { opacity: 0.85; }
+  button.ghost-btn {
+    width: 100%;
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 13px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  /* Top bar during quiz */
+  .topbar {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .topbar-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+  .progress-track {
+    height: 6px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 4px;
+    transition: width 0.25s ease;
+  }
+  .timer-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .timer-track {
+    flex: 1;
+    height: 8px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .timer-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1s linear, background 0.3s ease;
+    background: var(--apply);
+  }
+  .timer-num {
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    font-size: 0.85rem;
+    min-width: 30px;
+    text-align: right;
+  }
+  .badges {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .badge {
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 100px;
+    color: #fff;
+  }
+  .badge.topic {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    text-transform: none;
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+  .qtext {
+    font-size: 1.02rem;
+    line-height: 1.45;
+    font-weight: 650;
+    margin: 0 0 16px;
+  }
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+  .option-btn {
+    text-align: left;
+    border: 1.5px solid var(--border);
+    background: var(--card-bg);
+    color: var(--text);
+    border-radius: 13px;
+    padding: 13px 14px;
+    font-size: 0.92rem;
+    line-height: 1.35;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .option-btn .letter {
+    flex: none;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--text-muted);
+  }
+  .option-btn.correct {
+    background: var(--correct-soft);
+    border-color: var(--correct);
+  }
+  .option-btn.correct .letter {
+    background: var(--correct);
+    border-color: var(--correct);
+    color: #fff;
+  }
+  .option-btn.incorrect {
+    background: var(--incorrect-soft);
+    border-color: var(--incorrect);
+  }
+  .option-btn.incorrect .letter {
+    background: var(--incorrect);
+    border-color: var(--incorrect);
+    color: #fff;
+  }
+  .option-btn.dim { opacity: 0.55; }
+  .feedback-line {
+    margin-top: 14px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-align: center;
+    min-height: 18px;
+  }
+  .feedback-line.ok { color: var(--correct); }
+  .feedback-line.no { color: var(--incorrect); }
+  /* Results */
+  .score-hero {
+    text-align: center;
+    padding: 6px 0 4px;
+  }
+  .score-hero .big {
+    font-size: 3rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--accent);
+  }
+  .score-hero .pct {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-top: 4px;
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin: 18px 0;
+  }
+  .stat-cell {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 12px;
+  }
+  .stat-cell .lvl {
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .stat-cell .num {
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin-top: 2px;
+  }
+  .review-title {
+    font-size: 0.85rem;
+    font-weight: 800;
+    margin: 18px 0 8px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .review-item {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 8px;
+  }
+  .review-item .rq {
+    font-size: 0.88rem;
+    font-weight: 650;
+    margin-bottom: 6px;
+  }
+  .review-item .ra {
+    font-size: 0.82rem;
+    color: var(--correct);
+  }
+  .review-item .rt {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .hidden { display: none !important; }
+  .footer-note {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    margin-top: 14px;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div class="brand">
+    <h1>🧬 Biochemistry Bloom's Blitz</h1>
+    <p>SMS 111 — Biological Chemistry III &amp; IV</p>
+  </div>
+
+  <!-- START SCREEN -->
+  <div id="startScreen" class="card">
+    <p style="margin:0 0 6px; font-weight:800; font-size:1.05rem;">Alright <span class="name-tag">Prince</span>, let's see it 👀</p>
+    <p style="margin:0; color:var(--text-muted); font-size:0.9rem;">100 no matter the topic, huh? This set is built straight from the SMS 111 slides — carbohydrates, lipids, amino acids &amp; proteins, and nucleic acids — across <b>every level of Bloom's taxonomy</b>.</p>
+    <ul class="start-list">
+      <li><span class="dot"></span>100 questions: Remember, Understand, Apply, Analyze, Evaluate &amp; Create</li>
+      <li><span class="dot"></span>60 seconds per question — no answer, no marks, it moves on</li>
+      <li><span class="dot"></span>Answer (right or wrong) and it reveals the answer, then auto-advances</li>
+      <li><span class="dot"></span>No going back. No do-overs. Straight through.</li>
+    </ul>
+    <button class="primary-btn" id="startBtn">Start the Blitz</button>
+  </div>
+
+  <!-- QUIZ SCREEN -->
+  <div id="quizScreen" class="hidden">
+    <div class="topbar">
+      <div class="topbar-row">
+        <span id="qCounter">Question 1 of 100</span>
+        <span id="scoreLive">Score: 0</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <div class="timer-row">
+        <div class="timer-track"><div class="timer-fill" id="timerFill" style="width:100%"></div></div>
+        <span class="timer-num" id="timerNum">60s</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="badges">
+        <span class="badge" id="levelBadge">Remember</span>
+        <span class="badge topic" id="topicBadge">Carbohydrates</span>
+      </div>
+      <p class="qtext" id="qText"></p>
+      <div class="options" id="optionsWrap"></div>
+      <div class="feedback-line" id="feedbackLine"></div>
+    </div>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div id="resultsScreen" class="hidden">
+    <div class="card">
+      <div class="score-hero">
+        <div style="font-weight:700; color:var(--text-muted); font-size:0.85rem;">Prince's final score</div>
+        <div class="big"><span id="finalScore">0</span>/100</div>
+        <div class="pct" id="finalPct">0%</div>
+      </div>
+      <div class="stats-grid" id="statsGrid"></div>
+      <div id="reviewBlock"></div>
+      <button class="primary-btn" id="restartBtn">Run It Back</button>
+    </div>
+    <p class="footer-note">Missed or timed-out questions are reviewed above — correct answers shown in green.</p>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  // Every question's opts[0] is the correct answer. Options are shuffled at render time.
+  var LEVEL_COLOR = {
+    "Remember": "var(--remember)",
+    "Understand": "var(--understand)",
+    "Apply": "var(--apply)",
+    "Analyze": "var(--analyze)",
+    "Evaluate": "var(--evaluate)",
+    "Create": "var(--create)"
+  };
+
+  var QUESTIONS = [
+    {l:"Remember", t:"Carbohydrates", q:`What is the general chemical formula for a carbohydrate?`, o:[`(CH2O)n`,`CnH2nO`,`C6H12O6, always`,`CxHyOz with no consistent pattern`]},
+    {l:"Remember", t:"Carbohydrates", q:`Which term describes a carbohydrate that cannot be hydrolyzed into a smaller unit?`, o:[`Monosaccharide`,`Disaccharide`,`Oligosaccharide`,`Polysaccharide`]},
+    {l:"Remember", t:"Carbohydrates", q:`Which monosaccharide is commonly known as blood sugar?`, o:[`Glucose`,`Fructose`,`Galactose`,`Sucrose`]},
+    {l:"Remember", t:"Carbohydrates", q:`What type of bond joins two monosaccharide units together in a disaccharide?`, o:[`Glycosidic bond`,`Peptide bond`,`Phosphodiester bond`,`Ester bond to a protein`]},
+    {l:"Understand", t:"Carbohydrates", q:`Why is glucose classified as an aldose while fructose is classified as a ketose?`, o:[`Glucose has an aldehyde group; fructose has a ketone group`,`Glucose has a ketone group; fructose has an aldehyde group`,`Both have identical functional groups but different ring sizes`,`Classification is based on carbon number, not functional group`]},
+    {l:"Understand", t:"Carbohydrates", q:`A monosaccharide with 5 carbons is best described as:`, o:[`A pentose`,`A tetrose`,`A hexose`,`A heptose`]},
+    {l:"Understand", t:"Carbohydrates", q:`Which statement correctly explains why oligosaccharides differ from polysaccharides?`, o:[`Oligosaccharides contain 2-20 monosaccharide units, while polysaccharides are long chains, often over 1000 units`,`Oligosaccharides are always disaccharides`,`Polysaccharides cannot be hydrolyzed at all`,`Oligosaccharides occur only in plant tissue`]},
+    {l:"Understand", t:"Carbohydrates", q:`Why can the glycosidic bond in glucose be designated as either α or β?`, o:[`Because it depends on whether the anomeric hydroxyl group was α or β before the bond formed`,`Because glucose has two separate anomeric carbons`,`Because the ring size changes randomly during bonding`,`Because it depends only on solution pH`]},
+    {l:"Apply", t:"Carbohydrates", q:`A patient has lactase deficiency. Which sugar's digestion would be most directly impaired?`, o:[`Lactose`,`Sucrose`,`Maltose`,`Glucose`]},
+    {l:"Apply", t:"Carbohydrates", q:`A food label lists a sugar sourced from "cane and beet sugar, sorghum, and pineapple." Which disaccharide is most likely present?`, o:[`Sucrose`,`Maltose`,`Lactose`,`Cellobiose`]},
+    {l:"Apply", t:"Carbohydrates", q:`Starch in a meal is broken down into maltose during digestion. Which enzyme is responsible?`, o:[`Amylase`,`Lactase`,`Sucrase`,`A general protease`]},
+    {l:"Apply", t:"Carbohydrates", q:`A person's diet is rich in grains, tubers, and legumes. Which polysaccharide are they consuming the most of?`, o:[`Starch`,`Glycogen`,`Cellulose`,`Chitin`]},
+    {l:"Analyze", t:"Carbohydrates", q:`Amylose and amylopectin are both forms of starch, but amylopectin releases glucose faster during digestion. What structural difference explains this?`, o:[`Amylopectin is highly branched, offering more ends for enzyme action, while amylose is a simple unbranched chain`,`Amylose is branched and amylopectin is straight`,`They have identical structures with no branching differences`,`Amylopectin is made of fructose units instead of glucose`]},
+    {l:"Analyze", t:"Carbohydrates", q:`A patient has diarrhea and flatulence after dairy, and again after table sugar. What do lactose intolerance and sucrase deficiency have in common?`, o:[`Both result from disaccharide malabsorption due to a missing digestive enzyme`,`Both are caused by excess glucose absorption`,`Both only affect polysaccharide digestion`,`They are unrelated conditions with different mechanisms`]},
+    {l:"Analyze", t:"Carbohydrates", q:`Comparing glycogen and starch, both store glucose. What key difference distinguishes their biological roles?`, o:[`Glycogen stores glucose in the body (animals), while starch stores glucose in plants`,`Starch is found only in animal tissue`,`Glycogen cannot be hydrolyzed for energy`,`They are chemically identical with no functional difference`]},
+    {l:"Analyze", t:"Carbohydrates", q:`Given that a glycosidic bond can be α1-4, β1-4, or α1-6, why might this variation matter for digestibility?`, o:[`Different bond types affect which enzymes can hydrolyze them, influencing digestibility`,`All glycosidic bonds are digested identically by one enzyme`,`Bond type has no effect on structure or digestibility`,`Only β-bonds occur anywhere in the human diet`]},
+    {l:"Evaluate", t:"Carbohydrates", q:`A nutritionist claims "all carbohydrates are simple sugars and equally quick energy sources." Is this valid?`, o:[`No — polysaccharides like starch and glycogen are complex, branched macromolecules, not simple sugars`,`Yes — all carbohydrates release energy at the same rate`,`Yes — all carbohydrates share an identical structure`,`No — only fructose qualifies as a real sugar`]},
+    {l:"Evaluate", t:"Carbohydrates", q:`Which carbohydrate source best supports rapid, sustained glucose release in a medical emergency?`, o:[`Glycogen, since it provides rapid release of energy when needed in the body`,`Cellulose, since it is a polysaccharide`,`Sucrose alone, since it is a disaccharide`,`Amylose alone, since it is unbranched`]},
+    {l:"Evaluate", t:"Carbohydrates", q:`A colleague claims lactose intolerance and diabetes are essentially the same because both involve sugar. Evaluate this.`, o:[`Flawed — lactose intolerance stems from lactase deficiency causing disaccharide malabsorption, unrelated to blood glucose regulation`,`Correct — both involve glucose metabolism directly`,`Correct — both are polysaccharide disorders`,`Irrelevant — lactose intolerance involves no enzymes at all`]},
+    {l:"Create", t:"Carbohydrates", q:`For a patient pamphlet on carbohydrate classification, which hierarchy correctly orders categories from simplest to most complex?`, o:[`Monosaccharides → Disaccharides/Oligosaccharides → Polysaccharides`,`Polysaccharides → Monosaccharides → Disaccharides`,`Disaccharides → Polysaccharides → Monosaccharides`,`Oligosaccharides → Monosaccharides → Polysaccharides`]},
+    {l:"Create", t:"Carbohydrates", q:`Designing a diagnostic question for recurring post-meal bloating — which first question best distinguishes lactose intolerance from sucrase deficiency?`, o:[`"Do your symptoms occur after dairy products or after sugary/cane products?"`,`"Do your symptoms occur after eating protein?"`,`"Do you avoid all polysaccharides?"`,`"Have you ever eaten a monosaccharide?"`]},
+    {l:"Create", t:"Carbohydrates", q:`Which pairing correctly matches glucose to both of its classification bases (carbon number and functional group)?`, o:[`Glucose is a hexose (6 carbons) and an aldose (aldehyde group)`,`Glucose is a pentose and a ketose`,`Fructose is a hexose and an aldose`,`Fructose is a triose and a ketose`]},
+
+    {l:"Remember", t:"Lipids", q:`Which class of lipids is described as the principal building block of complex lipids?`, o:[`Fatty acids`,`Steroids`,`Terpenes`,`Waxes`]},
+    {l:"Remember", t:"Lipids", q:`Which lipid class is described as an ester of a fatty acid and is heat sensitive?`, o:[`Waxes`,`Triacylglycerols`,`Sphingolipids`,`Steroids`]},
+    {l:"Remember", t:"Lipids", q:`Which lipid category includes cholesterol, bile salts, and steroid hormones?`, o:[`Steroids`,`Sphingolipids`,`Glycerophospholipids`,`Terpenes`]},
+    {l:"Understand", t:"Lipids", q:`Why are triacylglycerols well suited as an energy-storage molecule?`, o:[`They are stored, then mobilized and oxidized to meet a cell's energy needs`,`They are always found as free fatty acids in the blood`,`They function only as hormones`,`They are water-soluble and easily excreted`]},
+    {l:"Understand", t:"Lipids", q:`What structurally distinguishes a saturated fatty acid from an unsaturated one?`, o:[`A saturated fatty acid has no double bonds; an unsaturated one has at least one`,`A saturated fatty acid always has a shorter chain`,`An unsaturated fatty acid never has a carboxyl group`,`Saturation refers to the number of phosphate groups`]},
+    {l:"Understand", t:"Lipids", q:`Why do steroid and prostaglandin derivatives count among the major physiological roles of fatty acids?`, o:[`Because fatty acid derivatives can serve as hormones and intracellular messengers`,`Because they function only as structural components`,`Because they cannot be metabolized further`,`Because they are unrelated to fatty acid metabolism`]},
+    {l:"Apply", t:"Lipids", q:`A protein needs to be anchored to a specific membrane location. What modification, per the slides, could achieve this?`, o:[`Covalent attachment of a fatty acid to the protein`,`Removal of all lipid content from the protein`,`Esterification of the protein with glucose`,`Formation of a peptide bond with a nucleotide`]},
+    {l:"Apply", t:"Lipids", q:`During a prolonged fast, stored energy is mobilized from adipose tissue. Which listed source of fatty acids is occurring?`, o:[`Adipolysis`,`De novo synthesis`,`Digestion of starch`,`Glycosidic hydrolysis`]},
+    {l:"Apply", t:"Lipids", q:`A lipid is a major brain and membrane component built on a sphingosine backbone. Which lipid class is this?`, o:[`Sphingolipids`,`Waxes`,`Terpenes`,`Triacylglycerols`]},
+    {l:"Analyze", t:"Lipids", q:`Comparing glycerophospholipids and sphingolipids as membrane components, what differentiates their backbone?`, o:[`Glycerophospholipids use a glycerol backbone; sphingolipids use a sphingosine backbone`,`Both use an identical glycerol backbone`,`Sphingolipids contain no fatty acids`,`Glycerophospholipids contain sugar units instead of fatty acids`]},
+    {l:"Analyze", t:"Lipids", q:`Excess dietary carbohydrate and protein can be converted into fatty acids and stored as triglycerides. What does this reveal?`, o:[`Fat storage isn't limited to dietary fat; excess carbs and protein can become stored fat too`,`Only dietary fat can become stored triglyceride`,`Protein can never be converted into any lipid form`,`Carbohydrate excess is always excreted, never stored as fat`]},
+    {l:"Analyze", t:"Lipids", q:`Cholesterol, bile salts, and steroid hormones are grouped as "steroids" despite differing functions. What does this suggest about the classification?`, o:[`Classification is based on shared core structure rather than shared physiological function`,`All steroids share one identical physiological role`,`Classification is based purely on function, not structure`,`Bile salts are structurally unrelated to cholesterol`]},
+    {l:"Evaluate", t:"Lipids", q:`A student claims "waxes are the best lipid for long-term energy storage since they contain fatty acids." Evaluate.`, o:[`Weak — triacylglycerols, not waxes, are the described energy-storage lipid; waxes are noted as heat-sensitive esters`,`Correct as stated — waxes are ideal for storage`,`Waxes and triacylglycerols are functionally identical`,`Energy storage is unrelated to lipid class`]},
+    {l:"Evaluate", t:"Lipids", q:`"Since fatty acid derivatives include steroid and sex hormones, all lipids function primarily as hormones." Fair conclusion?`, o:[`No — only a subset of fatty acid derivatives act as hormones; other lipid roles include structural, fuel, and membrane functions`,`Yes — all lipids are hormones`,`Yes — fatty acids are hormone precursors only`,`No — lipids have no hormonal function at all`]},
+    {l:"Create", t:"Lipids", q:`In a concept map of "Overview of Biological Lipids," which branch sits directly under fatty acids as their derivative?`, o:[`Prostaglandins`,`Steroids`,`Sphingolipids`,`Waxes`]},
+    {l:"Create", t:"Lipids", q:`For a vignette on a burn patient prescribed energy-dense lipids for recovery, which lipid class best fits "energy storage"?`, o:[`Triacylglycerols`,`Terpenes`,`Waxes`,`Steroids`]},
+
+    {l:"Remember", t:"Amino Acids & Proteins", q:`An amino acid is a bifunctional organic molecule containing which two functional groups?`, o:[`A carboxyl group and an amine group`,`A hydroxyl group and an aldehyde group`,`A phosphate group and a sugar group`,`A ketone group and an ester group`]},
+    {l:"Remember", t:"Amino Acids & Proteins", q:`How many standard (proteinogenic) amino acids commonly occur in proteins?`, o:[`22`,`20`,`300`,`11`]},
+    {l:"Remember", t:"Amino Acids & Proteins", q:`What is the bond called that links amino acids together in a protein chain?`, o:[`Peptide bond`,`Glycosidic bond`,`Phosphodiester bond`,`Hydrogen bond`]},
+    {l:"Remember", t:"Amino Acids & Proteins", q:`Which three amino acids are classified as branched-chain amino acids (BCAAs)?`, o:[`Leucine, isoleucine, valine`,`Lysine, arginine, histidine`,`Serine, threonine, tyrosine`,`Aspartate, glutamate, glycine`]},
+    {l:"Remember", t:"Amino Acids & Proteins", q:`Which two amino acids are the "dicarboxylic mono-amino acids" with a negative R-group charge?`, o:[`Aspartic acid and glutamic acid`,`Lysine and arginine`,`Serine and threonine`,`Alanine and glycine`]},
+    {l:"Remember", t:"Amino Acids & Proteins", q:`What deficiency causes maple syrup urine disease?`, o:[`Branched-chain alpha-keto acid dehydrogenase (BCKDH) deficiency`,`Lactase deficiency`,`Sucrase deficiency`,`Insulin deficiency`]},
+    {l:"Understand", t:"Amino Acids & Proteins", q:`Why are nonpolar amino acids such as alanine and valine considered hydrophobic?`, o:[`They have hydrocarbon side chains with no charge on the R group`,`They have ionic side chains`,`They contain carboxyl-rich R groups`,`They form hydrogen bonds through the R group`]},
+    {l:"Understand", t:"Amino Acids & Proteins", q:`Why do lysine, arginine, and histidine make an amino acid basic?`, o:[`They have more amino groups than carboxyl groups on their R group, giving a positive charge`,`They have more carboxyl groups than amino groups`,`They carry no charge on the R group`,`They lack a side chain entirely`]},
+    {l:"Understand", t:"Amino Acids & Proteins", q:`Why is tyrosine considered "conditionally essential" rather than strictly essential?`, o:[`It's produced from phenylalanine, so a phenylalanine-deficient diet makes tyrosine required too`,`It can never be synthesized by the body under any condition`,`It is toxic in excess amounts`,`It is not involved in protein synthesis at all`]},
+    {l:"Understand", t:"Amino Acids & Proteins", q:`Why does a deficiency in even one essential amino acid lead to degradation of the body's own proteins?`, o:[`Essential amino acids can't be synthesized by the body and must come from the diet for protein synthesis to proceed`,`Essential amino acids are only used for energy, not protein synthesis`,`The body stores essential amino acids indefinitely as reserve`,`Non-essential amino acids substitute for missing essential ones`]},
+    {l:"Understand", t:"Amino Acids & Proteins", q:`Why can amino acids be classified in more than one way (polarity, side chain type, nutritional requirement)?`, o:[`Different classification systems capture different chemical or physiological properties useful in different contexts`,`There is only one correct classification and the others are wrong`,`Amino acids change classification depending on temperature`,`Classification is arbitrary and has no chemical basis`]},
+    {l:"Understand", t:"Amino Acids & Proteins", q:`Why does post-translational modification, such as proline hydroxylation, matter for protein function?`, o:[`Such modifications are often essential for protein function or regulation, e.g. maintaining connective tissue`,`It converts the protein into a carbohydrate`,`It has no effect on protein function whatsoever`,`It removes that amino acid from the protein entirely`]},
+    {l:"Apply", t:"Amino Acids & Proteins", q:`A newborn is diagnosed with maple syrup urine disease. Which three amino acids would you expect elevated in blood and urine?`, o:[`Leucine, isoleucine, valine`,`Lysine, arginine, histidine`,`Aspartate, glutamate, serine`,`Glycine, alanine, proline`]},
+    {l:"Apply", t:"Amino Acids & Proteins", q:`A pregnant woman needs an amino acid described as a growth-promoting factor, important during pregnancy and growth. Which one?`, o:[`Arginine`,`Alanine`,`Glycine`,`Aspartate`]},
+    {l:"Apply", t:"Amino Acids & Proteins", q:`A burn patient's recovery diet is being planned. Which amino acid class has been used clinically to aid burn recovery?`, o:[`BCAAs (branched-chain amino acids)`,`Acidic amino acids`,`Aromatic amino acids only`,`Sulfur-containing amino acids only`]},
+    {l:"Apply", t:"Amino Acids & Proteins", q:`Which functional protein example correctly represents a hormone that regulates blood glucose?`, o:[`Insulin`,`Collagen`,`Keratin`,`Myosin`]},
+    {l:"Apply", t:"Amino Acids & Proteins", q:`A patient with liver disease and hepatic encephalopathy is being managed. Which amino acid group has clinical use here?`, o:[`BCAAs`,`Acidic amino acids`,`Basic amino acids only`,`Aromatic amino acids`]},
+    {l:"Apply", t:"Amino Acids & Proteins", q:`Alanine and serine combine to form the dipeptide "Alanylserine." What type of bond links them?`, o:[`An amide (peptide) bond between the carboxyl of one and the amino group of the other`,`A glycosidic bond`,`A disulfide bond`,`A phosphodiester bond`]},
+    {l:"Analyze", t:"Amino Acids & Proteins", q:`Comparing the essential and non-essential amino acid lists, what is the defining criterion separating the two groups?`, o:[`Whether the body can synthesize the amino acid itself, versus needing it from the diet`,`Whether the amino acid is charged or uncharged`,`Whether the amino acid occurs in animals or plants only`,`Whether the amino acid contains sulfur`]},
+    {l:"Analyze", t:"Amino Acids & Proteins", q:`A water-soluble protein has nonpolar amino acids exposed on its exterior surface. What would you predict about its stability?`, o:[`Less stable — hydrophobic side chains are typically buried away from water in folded, soluble proteins`,`More stable — hydrophobic groups prefer water`,`Stability is unaffected by side chain polarity`,`The protein couldn't exist — hydrophobic groups are chemically impossible`]},
+    {l:"Analyze", t:"Amino Acids & Proteins", q:`Comparing acidic (aspartate/glutamate) and basic (lysine/arginine/histidine) R groups, what distinguishes their behavior toward H+?`, o:[`Acidic R groups donate H+, while basic R groups accept H+`,`Both donate H+ equally`,`Acidic R groups accept H+, basic groups donate H+`,`Neither group interacts with H+`]},
+    {l:"Analyze", t:"Amino Acids & Proteins", q:`Why might a diet lacking essential amino acids be more damaging than one lacking non-essential amino acids?`, o:[`The body can't compensate for missing essential amino acids, but can synthesize non-essential ones as needed`,`Non-essential amino acids are more important for protein structure`,`Essential amino acids aren't actually used in proteins`,`There is no real physiological difference between the two`]},
+    {l:"Analyze", t:"Amino Acids & Proteins", q:`Hemoglobin (transport) and myosin (movement) are both proteins built from the same 22 standard amino acids. What does this illustrate?`, o:[`The same building blocks can be arranged into different sequences and structures to produce diverse specialized functions`,`All proteins with the same amino acids perform identical functions`,`Amino acid composition has no bearing on protein function`,`Only structural proteins are built from the standard amino acids`]},
+    {l:"Analyze", t:"Amino Acids & Proteins", q:`The body can synthesize 11 of the 20 genetically-encoded amino acids. What does this suggest about dietary protein needs?`, o:[`Roughly half of standard amino acids must come from diet, making dietary protein quality biologically important`,`All amino acids must come from the diet`,`No amino acids need to come from the diet`,`Only one amino acid needs to come from the diet`]},
+    {l:"Evaluate", t:"Amino Acids & Proteins", q:`"Since the body makes 11 of 20 amino acids, dietary protein intake isn't really necessary." Evaluate this claim.`, o:[`Flawed — the remaining essential amino acids must still come from diet, and their absence degrades body protein`,`Valid — 11 is the majority, so diet matters little`,`Valid — non-essential amino acids are unimportant anyway`,`Irrelevant to protein function overall`]},
+    {l:"Evaluate", t:"Amino Acids & Proteins", q:`"All amino acids with a charged R group are essential amino acids." Assess this against the slide examples.`, o:[`Invalid — charge and essentiality are separate systems; e.g. aspartic acid is acidic but non-essential, while lysine is basic and essential`,`Valid — charge always determines essentiality`,`Valid — only acidic amino acids are essential`,`Invalid — no amino acids actually have charged R groups`]},
+    {l:"Evaluate", t:"Amino Acids & Proteins", q:`"Post-translational modifications like proline hydroxylation are minor and unimportant." Is this accurate per the slides?`, o:[`No — such modifications are often essential for protein function and regulation, e.g. maintaining connective tissue`,`Yes — they are irrelevant to protein structure`,`Yes — they only occur in non-human proteins`,`No — they always destroy protein function`]},
+    {l:"Evaluate", t:"Amino Acids & Proteins", q:`Would the four polarity-based amino acid categories alone be sufficient to fully predict a protein's 3D folding?`, o:[`Not entirely — polarity influences folding, but sequence, side-chain size, and environment also matter`,`Yes — polarity alone fully determines 3D structure`,`No — polarity is irrelevant to folding`,`Yes — but only for essential amino acids`]},
+    {l:"Evaluate", t:"Amino Acids & Proteins", q:`"BCAAs are only useful for muscle building in athletes." Evaluate using the slide's clinical uses of BCAAs.`, o:[`Too narrow — BCAAs are also used clinically in burn recovery and hepatic encephalopathy management`,`Fully accurate and complete as stated`,`BCAAs have no clinical relevance at all`,`BCAAs are irrelevant to muscle protein`]},
+    {l:"Create", t:"Amino Acids & Proteins", q:`Which mnemonic correctly groups all 10 amino acids listed as essential in the slides?`, o:[`"PVT TIM HALL" — Phenylalanine, Valine, Threonine, Tryptophan, Isoleucine, Methionine, Histidine, Arginine, Leucine, Lysine`,`A mnemonic using only glycine, alanine, serine`,`A mnemonic using only aspartate and glutamate`,`A mnemonic including glucose and fructose`]},
+    {l:"Create", t:"Amino Acids & Proteins", q:`An unknown amino acid's R group has more carboxyl groups than amino groups. Which classification branch fits?`, o:[`Polar amino acids with negative charge (acidic)`,`Polar amino acids with positive charge (basic)`,`Non-polar amino acids`,`Polar amino acids with no charge`]},
+    {l:"Create", t:"Amino Acids & Proteins", q:`In a study-guide table linking protein function to example, which pairing correctly matches "Protection" to its example?`, o:[`Immunoglobulins`,`Hemoglobin`,`Insulin`,`Actin`]},
+    {l:"Create", t:"Amino Acids & Proteins", q:`Which answer correctly explains why the universal genetic code encodes only 20 of the 22 proteinogenic amino acids?`, o:[`Selenocysteine and pyrrolysine are incorporated by unique synthetic mechanisms, not the universal genetic code`,`All 22 are encoded by the universal genetic code`,`None of the 22 are encoded by the genetic code`,`Only glycine is encoded by the genetic code`]},
+    {l:"Create", t:"Amino Acids & Proteins", q:`Which post-translational modification increases a protein's calcium-binding capacity, per the slides?`, o:[`Carboxylation of glutamate`,`Hydroxylation of proline`,`Phosphorylation of glucose`,`Deamination of glycine`]},
+
+    {l:"Remember", t:"Nucleic Acids", q:`What are the two main types of nucleic acids described in the slides?`, o:[`DNA and RNA`,`Protein and lipid`,`Glucose and fructose`,`Purine and amino acid`]},
+    {l:"Remember", t:"Nucleic Acids", q:`Which base is found in RNA but is replaced by thymine in DNA?`, o:[`Uracil`,`Cytosine`,`Adenine`,`Guanine`]},
+    {l:"Remember", t:"Nucleic Acids", q:`What are the three components that make up a nucleotide?`, o:[`A base, a sugar, and a phosphate residue`,`A base and a sugar only, with no phosphate`,`Two sugars and a phosphate`,`A protein and a nucleoside`]},
+    {l:"Remember", t:"Nucleic Acids", q:`What is the bond called that links a base to a sugar in a nucleoside?`, o:[`An N-glycosidic bond`,`A peptide bond`,`A phosphodiester bond`,`A hydrogen bond`]},
+    {l:"Remember", t:"Nucleic Acids", q:`What is the name of the bond that links nucleotides together into a polynucleotide chain?`, o:[`A phosphodiester bond`,`A glycosidic bond`,`A peptide bond`,`An ionic bond`]},
+    {l:"Understand", t:"Nucleic Acids", q:`Why are adenine and guanine classified as purines while cytosine, thymine, and uracil are pyrimidines?`, o:[`Purines have two fused rings, while pyrimidines have a single six-membered ring`,`Purines have one ring; pyrimidines have two rings`,`Both share an identical ring structure`,`Classification is based on sugar type, not ring structure`]},
+    {l:"Understand", t:"Nucleic Acids", q:`Why does the N-glycosidic bond in a nucleoside consistently link C-1 of the sugar to N-9 of a purine (or N-1 of a pyrimidine) in the β-configuration?`, o:[`This is the specific, consistent structural linkage described for base-sugar bonding in nucleoside formation`,`Because it varies randomly between nucleosides`,`Because it only occurs in RNA, never DNA`,`Because it depends on which phosphate group is present`]},
+    {l:"Understand", t:"Nucleic Acids", q:`Why does the 5' end of a DNA strand typically carry a free phosphate while the 3' end carries a free hydroxyl?`, o:[`Phosphodiester bonds form between the 5'-phosphate of one nucleotide and the 3'-OH of the next, leaving these ends free`,`DNA strands have no directionality at all`,`Both ends always carry a free phosphate group`,`Both ends always carry a free hydroxyl group`]},
+    {l:"Understand", t:"Nucleic Acids", q:`Why do two hydrogen bonds form between A and T, while three form between G and C?`, o:[`This reflects the specific complementary base-pairing pattern that is key to DNA double-helix stability`,`All base pairs form an identical number of hydrogen bonds`,`A-T and G-C pairing is random and inconsistent`,`Hydrogen bonds don't actually contribute to DNA stability`]},
+    {l:"Understand", t:"Nucleic Acids", q:`Why is each DNA base pair composed of one purine and one pyrimidine, rather than two purines or two pyrimidines?`, o:[`This keeps the two strands at equal width throughout the helix, since purine-pyrimidine pairs are consistently sized`,`Because pyrimidines can never bond with each other under any circumstance`,`Because purines are chemically unstable when paired together`,`Base pair composition is unrelated to helix geometry`]},
+    {l:"Apply", t:"Nucleic Acids", q:`If a DNA strand contains adenine at a given position, which base pairs with it on the complementary strand?`, o:[`Thymine`,`Guanine`,`Cytosine`,`Another adenine`]},
+    {l:"Apply", t:"Nucleic Acids", q:`dTMP is the DNA nucleotide for thymine. Using the nomenclature table, what is the corresponding RNA nucleotide for uracil called?`, o:[`Uridine 5'-monophosphate (UMP)`,`Deoxyuridine 5'-monophosphate (dUMP)`,`Uridylate triphosphate only`,`Thymidine monophosphate`]},
+    {l:"Apply", t:"Nucleic Acids", q:`To build ATP-like molecules with high-energy bonds linking extra phosphates, what type of bond is used?`, o:[`An acid-anhydride bond`,`A glycosidic bond`,`A peptide bond`,`An ester bond to a sugar hydroxyl`]},
+    {l:"Apply", t:"Nucleic Acids", q:`If a nucleoside is called "cytidine," what are its corresponding base and 5'-monophosphate nucleotide called?`, o:[`Base = cytosine; nucleotide = cytidine 5'-monophosphate (CMP)`,`Base = guanine; nucleotide = GMP`,`Base = uracil; nucleotide = UMP`,`Base = adenine; nucleotide = AMP`]},
+    {l:"Apply", t:"Nucleic Acids", q:`Mg2+ ions and basic proteins rich in arginine and lysine help stabilize DNA. What problem are they counteracting?`, o:[`Electrostatic repulsion between the negatively charged phosphate groups of the DNA backbone`,`Excess hydrogen bonding between bases`,`Excess hydrophobic stacking between bases`,`Instability caused specifically by pyrimidine rings`]},
+    {l:"Analyze", t:"Nucleic Acids", q:`Of the four interactions stabilizing double-stranded DNA, which is described as a potential source of instability that must be counteracted, rather than a purely stabilizing force?`, o:[`Charge-charge interactions (phosphate backbone repulsion)`,`Stacking interactions`,`Hydrogen bonds`,`Hydrophobic effects`]},
+    {l:"Analyze", t:"Nucleic Acids", q:`Phosphodiester bonds form between the phosphate of one nucleotide and the 3-OH of the next. What directional consequence does this create for chain growth?`, o:[`The chain has directionality, conventionally written 5' to 3', with growth extending the 3' end`,`The chain has no directionality at all`,`The chain grows equally from both ends simultaneously`,`Directionality applies only to RNA, never DNA`]},
+    {l:"Analyze", t:"Nucleic Acids", q:`DNA and RNA are both polynucleotides, but differ in two specific chemical features. What are they?`, o:[`The sugar type (deoxyribose vs. ribose) and the base thymine (DNA) vs. uracil (RNA)`,`The type of phosphate group and the number of strands`,`The presence of purines only in DNA`,`The type of hydrogen bonding only`]},
+    {l:"Analyze", t:"Nucleic Acids", q:`A DNA sample has an unusually high G-C content compared to A-T. What would you predict about its stability under heat?`, o:[`More stable — requires more heat to denature, since G-C pairs form three hydrogen bonds versus two for A-T`,`Less stable, since G-C pairs form fewer bonds`,`Stability is unrelated to hydrogen-bond count`,`G-C content has no effect on melting behavior`]},
+    {l:"Analyze", t:"Nucleic Acids", q:`Selenocysteine incorporation and specialized nucleotide biosynthesis both use non-standard mechanisms. What general principle do they illustrate?`, o:[`Some biologically important molecules require unique, non-standard synthetic or incorporation mechanisms beyond the universal pathways`,`All biomolecules are synthesized identically`,`Only nucleic acids ever use specialized mechanisms`,`Only proteins ever use specialized mechanisms`]},
+    {l:"Evaluate", t:"Nucleic Acids", q:`"Since DNA and RNA are both nucleic acids, they are functionally interchangeable in the cell." Evaluate.`, o:[`Inaccurate — DNA functions solely in information storage, while RNA is involved in most steps of gene expression and protein biosynthesis`,`Accurate — both function identically in the cell`,`RNA only stores information; DNA carries out expression`,`Neither molecule has any distinct function`]},
+    {l:"Evaluate", t:"Nucleic Acids", q:`"Hydrogen bonding is the only force holding the DNA double helix together." Is this consistent with the slides?`, o:[`No — four interactions contribute: stacking, hydrogen bonds, hydrophobic effects, and charge-charge interactions`,`Yes — hydrogen bonding is the sole stabilizing force`,`No — DNA has no hydrogen bonding at all`,`Yes — but only within RNA, not DNA`]},
+    {l:"Evaluate", t:"Nucleic Acids", q:`"Nucleosides and nucleotides are the same molecule, just different names." Assess this claim.`, o:[`Incorrect — a nucleoside is base + sugar, while a nucleotide is a nucleoside plus one or more phosphate groups`,`Correct — they are identical molecules`,`A nucleotide has no phosphate group at all`,`A nucleoside has a phosphate group but a nucleotide does not`]},
+    {l:"Evaluate", t:"Nucleic Acids", q:`"Since ATP and ADP are nucleotides, they only function in nucleic acid structure, not energy metabolism." Evaluate.`, o:[`No — ADP and ATP are explicitly described as important coenzymes in energy metabolism, beyond their nucleotide classification`,`Yes — they function only in nucleic acid structure`,`No — because ATP and ADP are actually amino acids`,`Yes — nucleotides never participate in metabolism`]},
+    {l:"Create", t:"Nucleic Acids", q:`Which correctly orders the components of a nucleotide from the base outward: base — ? — ?`, o:[`Base — sugar (ribose or deoxyribose) — phosphate`,`Base — phosphate — sugar`,`Sugar — base — phosphate`,`Phosphate — base — sugar`]},
+    {l:"Create", t:"Nucleic Acids", q:`Contrasting nucleoside naming for adenine in RNA vs. DNA, which pairing is correct?`, o:[`RNA: adenosine; DNA: deoxyadenosine`,`RNA: deoxyadenosine; DNA: adenosine`,`Both are called adenosine regardless of sugar`,`Both are called deoxyadenosine regardless of sugar`]},
+    {l:"Create", t:"Nucleic Acids", q:`"In double-stranded DNA, how do the two strands run relative to each other?" What is the correct answer?`, o:[`Antiparallel — running in opposite directions`,`Parallel — running in the same direction`,`Perpendicular to one another`,`Their direction is random and variable`]},
+    {l:"Create", t:"Nucleic Acids", q:`Which statement correctly synthesizes all four stabilizing interactions of the DNA helix into one summary?`, o:[`Stability results from base stacking (van der Waals forces), inter-strand hydrogen bonding, burial of hydrophobic rings in the helix core, and minimized phosphate backbone repulsion via cations/basic proteins`,`Stability results solely from hydrogen bonding between bases`,`Stability is unrelated to any chemical interactions`,`Stability depends only on the sugar-phosphate backbone charge`]}
+  ];
+
+  var TOTAL = QUESTIONS.length;
+  var LETTERS = ["A","B","C","D"];
+
+  var startScreen = document.getElementById('startScreen');
+  var quizScreen = document.getElementById('quizScreen');
+  var resultsScreen = document.getElementById('resultsScreen');
+  var startBtn = document.getElementById('startBtn');
+  var restartBtn = document.getElementById('restartBtn');
+
+  var qCounter = document.getElementById('qCounter');
+  var scoreLive = document.getElementById('scoreLive');
+  var progressFill = document.getElementById('progressFill');
+  var timerFill = document.getElementById('timerFill');
+  var timerNum = document.getElementById('timerNum');
+  var levelBadge = document.getElementById('levelBadge');
+  var topicBadge = document.getElementById('topicBadge');
+  var qText = document.getElementById('qText');
+  var optionsWrap = document.getElementById('optionsWrap');
+  var feedbackLine = document.getElementById('feedbackLine');
+
+  var deck = [];
+  var idx = 0;
+  var score = 0;
+  var answered = false;
+  var timeLeft = 60;
+  var timerInt = null;
+  var currentCorrectIdx = 0;
+  var currentShuffled = [];
+  var lastCorrectLetter = -1;
+
+  var levelStats = {};
+  var missed = [];
+
+  function shuffle(arr){
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+    }
+    return a;
+  }
+
+  function buildDeck(){
+    deck = shuffle(QUESTIONS);
+  }
+
+  function resetState(){
+    idx = 0; score = 0; missed = [];
+    levelStats = {};
+    ["Remember","Understand","Apply","Analyze","Evaluate","Create"].forEach(function(l){
+      levelStats[l] = {correct:0, total:0};
+    });
+    lastCorrectLetter = -1;
+  }
+
+  function shuffleOptionsFor(item){
+    var pairs = item.o.map(function(text, i){ return {text: text, isCorrect: i === 0}; });
+    var shuffled = shuffle(pairs);
+    var correctIdx = shuffled.findIndex(function(p){ return p.isCorrect; });
+    // avoid the same letter position twice in a row
+    var attempts = 0;
+    while (correctIdx === lastCorrectLetter && attempts < 6) {
+      shuffled = shuffle(pairs);
+      correctIdx = shuffled.findIndex(function(p){ return p.isCorrect; });
+      attempts++;
+    }
+    lastCorrectLetter = correctIdx;
+    return { options: shuffled.map(function(p){ return p.text; }), correctIdx: correctIdx };
+  }
+
+  function renderQuestion(){
+    clearInterval(timerInt);
+    answered = false;
+    timeLeft = 60;
+    var item = deck[idx];
+    var r = shuffleOptionsFor(item);
+    currentShuffled = r.options;
+    currentCorrectIdx = r.correctIdx;
+
+    qCounter.textContent = "Question " + (idx + 1) + " of " + TOTAL;
+    scoreLive.textContent = "Score: " + score;
+    progressFill.style.width = ((idx) / TOTAL * 100) + "%";
+
+    levelBadge.textContent = item.l;
+    levelBadge.style.background = LEVEL_COLOR[item.l] || "var(--accent)";
+    topicBadge.textContent = item.t;
+    qText.textContent = item.q;
+    feedbackLine.textContent = "";
+    feedbackLine.className = "feedback-line";
+
+    optionsWrap.innerHTML = "";
+    currentShuffled.forEach(function(text, i){
+      var btn = document.createElement('button');
+      btn.className = "option-btn";
+      btn.innerHTML = '<span class="letter">' + LETTERS[i] + '</span><span>' + escapeHtml(text) + '</span>';
+      btn.addEventListener('click', function(){ selectOption(i); });
+      optionsWrap.appendChild(btn);
+    });
+
+    timerFill.style.transition = "none";
+    timerFill.style.width = "100%";
+    timerFill.style.background = "var(--apply)";
+    timerNum.textContent = "60s";
+    // force reflow so the next transition applies
+    void timerFill.offsetWidth;
+    timerFill.style.transition = "width 1s linear, background 0.3s ease";
+
+    timerInt = setInterval(tick, 1000);
+  }
+
+  function tick(){
+    timeLeft -= 1;
+    if (timeLeft < 0) timeLeft = 0;
+    var pct = (timeLeft / 60) * 100;
+    timerFill.style.width = pct + "%";
+    timerNum.textContent = timeLeft + "s";
+    if (timeLeft <= 10) { timerFill.style.background = "var(--incorrect)"; }
+    else if (timeLeft <= 25) { timerFill.style.background = "var(--analyze)"; }
+    else { timerFill.style.background = "var(--apply)"; }
+
+    if (timeLeft <= 0) {
+      clearInterval(timerInt);
+      if (!answered) handleTimeout();
+    }
+  }
+
+  function escapeHtml(str){
+    var d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  function lockButtons(){
+    var btns = optionsWrap.querySelectorAll('.option-btn');
+    btns.forEach(function(b){ b.style.pointerEvents = "none"; });
+    return btns;
+  }
+
+  function recordStat(item, wasCorrect){
+    levelStats[item.l].total += 1;
+    if (wasCorrect) levelStats[item.l].correct += 1;
+  }
+
+  function selectOption(i){
+    if (answered) return;
+    answered = true;
+    clearInterval(timerInt);
+    var item = deck[idx];
+    var btns = lockButtons();
+    var wasCorrect = (i === currentCorrectIdx);
+
+    btns[currentCorrectIdx].classList.add('correct');
+    if (!wasCorrect) {
+      btns[i].classList.add('incorrect');
+    }
+    btns.forEach(function(b, bi){
+      if (bi !== i && bi !== currentCorrectIdx) b.classList.add('dim');
+    });
+
+    if (wasCorrect) {
+      score += 1;
+      feedbackLine.textContent = "✓ Correct!";
+      feedbackLine.className = "feedback-line ok";
+    } else {
+      feedbackLine.textContent = "✗ Not quite — correct answer highlighted";
+      feedbackLine.className = "feedback-line no";
+      missed.push({q: item.q, t: item.t, l: item.l, correct: currentShuffled[currentCorrectIdx], your: currentShuffled[i]});
+    }
+    recordStat(item, wasCorrect);
+    scoreLive.textContent = "Score: " + score;
+    setTimeout(nextQuestion, 1500);
+  }
+
+  function handleTimeout(){
+    answered = true;
+    var item = deck[idx];
+    var btns = lockButtons();
+    btns[currentCorrectIdx].classList.add('correct');
+    btns.forEach(function(b, bi){
+      if (bi !== currentCorrectIdx) b.classList.add('dim');
+    });
+    feedbackLine.textContent = "⏱ Time's up — correct answer highlighted";
+    feedbackLine.className = "feedback-line no";
+    missed.push({q: item.q, t: item.t, l: item.l, correct: currentShuffled[currentCorrectIdx], your: "No answer (timed out)"});
+    recordStat(item, false);
+    setTimeout(nextQuestion, 1500);
+  }
+
+  function nextQuestion(){
+    idx += 1;
+    if (idx >= TOTAL) {
+      showResults();
+    } else {
+      renderQuestion();
+    }
+  }
+
+  function showResults(){
+    quizScreen.classList.add('hidden');
+    resultsScreen.classList.remove('hidden');
+    document.getElementById('finalScore').textContent = score;
+    document.getElementById('finalPct').textContent = Math.round((score / TOTAL) * 100) + "% overall";
+
+    var statsGrid = document.getElementById('statsGrid');
+    statsGrid.innerHTML = "";
+    ["Remember","Understand","Apply","Analyze","Evaluate","Create"].forEach(function(l){
+      var s = levelStats[l];
+      var cell = document.createElement('div');
+      cell.className = "stat-cell";
+      cell.innerHTML = '<div class="lvl" style="color:' + LEVEL_COLOR[l] + '">' + l + '</div><div class="num">' + s.correct + ' / ' + s.total + '</div>';
+      statsGrid.appendChild(cell);
+    });
+
+    var reviewBlock = document.getElementById('reviewBlock');
+    reviewBlock.innerHTML = "";
+    if (missed.length > 0) {
+      var title = document.createElement('div');
+      title.className = "review-title";
+      title.textContent = "Review — " + missed.length + " missed or timed out";
+      reviewBlock.appendChild(title);
+      missed.forEach(function(m){
+        var item = document.createElement('div');
+        item.className = "review-item";
+        item.innerHTML = '<div class="rt" style="color:' + LEVEL_COLOR[m.l] + '">' + m.l + ' · ' + escapeHtml(m.t) + '</div>' +
+          '<div class="rq">' + escapeHtml(m.q) + '</div>' +
+          '<div class="ra">Correct: ' + escapeHtml(m.correct) + '</div>';
+        reviewBlock.appendChild(item);
+      });
+    } else {
+      var perfect = document.createElement('div');
+      perfect.style.textAlign = "center";
+      perfect.style.color = "var(--correct)";
+      perfect.style.fontWeight = "800";
+      perfect.style.margin = "10px 0";
+      perfect.textContent = "Perfect run. Every single one, right or on time.";
+      reviewBlock.appendChild(perfect);
+    }
+  }
+
+  function startQuiz(){
+    buildDeck();
+    resetState();
+    startScreen.classList.add('hidden');
+    resultsScreen.classList.add('hidden');
+    quizScreen.classList.remove('hidden');
+    renderQuestion();
+  }
+
+  startBtn.addEventListener('click', startQuiz);
+  restartBtn.addEventListener('click', function(){
+    resultsScreen.classList.add('hidden');
+    startScreen.classList.remove('hidden');
+  });
+})();
+</script>
+</body>
+</html>
